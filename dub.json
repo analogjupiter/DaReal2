@@ -1,0 +1,20 @@
+{
+    "name": "dareal2",
+    "description": "🔧🎮 DaReal² Engine",
+
+    "copyright": "Copyright © 2018  0xEAB",
+    "license": "MPL-2.0",
+
+    "authors": [
+        "Elias Batek (0xEAB)"
+    ],
+
+    "targetPath": "bin",
+
+    "stringImportPaths": [
+        "source/static-import"
+    ],
+
+    "dependencies": {
+    }
+}
