@@ -28,10 +28,12 @@ interface IClocked
  +/
 interface IDrawable
 {
+    import arsd.nanovega : NVGContext;
+
     /++
         Draws the object
      +/
-    void draw();
+    void draw(NVGContext ctx);
 }
 
 /++
