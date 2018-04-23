@@ -1,6 +1,6 @@
 {
     "name": "dareal2",
-    "description": "🔧🎮 DaReal² Engine",
+    "description": "🎮🔧 DaReal² Engine",
 
     "copyright": "Copyright © 2018  0xEAB",
     "license": "MPL-2.0",
@@ -11,10 +11,8 @@
 
     "targetPath": "bin",
 
-    "stringImportPaths": [
-        "source/static-import"
-    ],
-
     "dependencies": {
+        "arsd-official:nanovega": "~>1.4.0",
+        "eventsystem": "~>1.2.0"
     }
 }
