@@ -314,9 +314,37 @@ class SpriteMap : IDrawable
 
     public
     {
+        /++
+            Draws the current frame
+         +/
         void draw()
         {
-            this._paint.drawImage(this._position, this._frameSize);
+            this._paint.drawImage(this._position, tihs._frameSize);
+        }
+
+        /++
+            Move to the next frame of the sprite sheet
+         +/
+        void nextFrame()
+        {
+            // Row end?
+            if (((this._currentSprite.y + 1) * this._frameSize.width) >= this._spriteSheet.width)
+            {
+                ++this._currentSprite.y;
+
+                // Last row?
+                if (((this._currentSprite.y) * this.frameSize.height) >= this._spriteSheet.height)
+                {
+                    this._currentSprite.x = 0;
+                    this._currentSprite.y = 0;
+                }
+            }
+            else
+            {
+                ++this._currentSprite.x;
+            }
+
+            this.updatePaint();
         }
     }
 
@@ -324,8 +352,9 @@ class SpriteMap : IDrawable
     {
         void updatePaint()
         {
-            this._paint = darealNVGContext.imagePattern(0, 0,
-                    this._frameSize.width, this._frameSize.height, this._image);
+            this._paint = darealNVGContext.imagePattern(this._currentSprite.x,
+                    this._currentSprite.y, this._frameSize.width,
+                    this._frameSize.height, this._image);
         }
     }
 }
