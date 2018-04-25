@@ -89,6 +89,10 @@ struct Point
         {
             return Point(this._x * b, this._y * b);
         }
+        else static if (is(Unqual!T == Size) && (op == "+"))
+        {
+            return Point(this._x + b.width, this._y + b.height);
+        }
         else
         {
             static assert(0,
@@ -183,19 +187,19 @@ struct Size
     {
         static if (is(Unqual!T == Size) && (op == "+"))
         {
-            return Point(this._width + b._width, this._height + b._height);
+            return Size(this._width + b._width, this._height + b._height);
         }
         else static if (is(Unqual!T == Size) && (op == "-"))
         {
-            return Point(this._width - b._width, this._height - b._height);
+            return Size(this._width - b._width, this._height - b._height);
         }
         else static if (is(Unqual!T == int) && (op == "*"))
         {
-            return Point(this._width * b, this._height * b);
+            return Size(this._width * b, this._height * b);
         }
         else static if (is(Unqual!T == int) && (op == "/"))
         {
-            return Point(this._width / b, this._height / b);
+            return Size(this._width / b, this._height / b);
         }
         else
         {

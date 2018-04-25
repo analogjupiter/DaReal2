@@ -8,8 +8,6 @@
  +/
 module dareal.legacy.interfaces;
 
-import std.traits : ReturnType;
-
 public:
 
 /++
@@ -28,12 +26,10 @@ interface IClocked
  +/
 interface IDrawable
 {
-    import arsd.nanovega : NVGContext;
-
     /++
         Draws the object
      +/
-    void draw(NVGContext ctx);
+    void draw();
 }
 
 /++
