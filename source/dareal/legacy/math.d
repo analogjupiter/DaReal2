@@ -36,6 +36,12 @@ struct Point
             {
                 return this._x;
             }
+
+            /++ ditto +/
+            void x(int value)
+            {
+                this._x = value;
+            }
         }
 
         @property
@@ -48,6 +54,12 @@ struct Point
             int y()
             {
                 return this._y;
+            }
+
+            /++ ditto +/
+            void y(int value)
+            {
+                this._y = value;
             }
         }
     }
@@ -157,6 +169,12 @@ struct Size
             {
                 return this._width;
             }
+
+            /++ ditto +/
+            void width(int value)
+            {
+                this._width = value;
+            }
         }
 
         @property
@@ -167,6 +185,12 @@ struct Size
             int height()
             {
                 return this._height;
+            }
+
+            /++ ditto +/
+            void height(int value)
+            {
+                this._height = value;
             }
         }
     }
