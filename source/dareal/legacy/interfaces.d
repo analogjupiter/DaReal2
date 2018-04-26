@@ -8,6 +8,8 @@
  +/
 module dareal.legacy.interfaces;
 
+public import dareal.legacy.math : Point;
+
 public:
 
 /++
@@ -30,6 +32,20 @@ interface IDrawable
         Draws the object
      +/
     void draw();
+}
+
+/++
+    Interface for objects with a position
+ +/
+interface IPositioned
+{
+    /++
+        Position of the object
+     +/
+    Point position();
+
+    /++ ditto +/
+    void position(Point value);
 }
 
 /++
