@@ -23,7 +23,7 @@ struct Point
         int _y;
     }
 
-    inout
+    public
     {
         @property
         {
@@ -32,7 +32,7 @@ struct Point
 
                 "abscissa"
              +/
-            int x()
+            ref int x()
             {
                 return this._x;
             }
@@ -51,7 +51,7 @@ struct Point
 
                 "ordinate"
              +/
-            int y()
+            ref int y()
             {
                 return this._y;
             }
@@ -158,14 +158,14 @@ struct Size
         int _height;
     }
 
-    inout
+    public
     {
         @property
         {
             /++
                 Width
              +/
-            int width()
+            ref int width()
             {
                 return this._width;
             }
@@ -182,7 +182,7 @@ struct Size
             /++
                 Height
              +/
-            int height()
+            ref int height()
             {
                 return this._height;
             }
