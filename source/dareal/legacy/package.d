@@ -7,9 +7,9 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 +/
 /++
-    dareal.legacy is an D port of DaRealJS.
+    dareal.legacy is a D port of DaRealJS.
 
-    DaRealJS has been written in C# and relies on Bridge.NET (transpiles to JS)
+    DaRealJS has been written in C# and relies on Bridge.NET (transpiles to JS).
     It is a drawing and timing library for game development and was developed
     as part of a school project. Some parts of it have been designed cheaply.
     Unfortunately, this was necessary for time reasons.
@@ -24,6 +24,7 @@
 module dareal.legacy;
 
 public:
+import dareal.legacy.graphics;
 import dareal.legacy.interfaces;
 import dareal.legacy.math;
 import dareal.legacy.timing;
