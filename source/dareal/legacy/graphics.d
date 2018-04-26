@@ -199,9 +199,48 @@ deprecated("Wouldn't use that anymore. dareal.legacy also got rid of it :) ") cl
 }
 
 /++
+    Base class for drawings with a position
+ +/
+abstract class PositionedDrawing : IDrawable, IPositioned
+{
+    protected
+    {
+        Point _position;
+    }
+
+    public
+    {
+        @property
+        {
+            /++
+                Position of the drawing
+             +/
+            Point position()
+            {
+                return this._position;
+            }
+
+            /++ ditto +/
+            void position(Point value)
+            {
+                this._position = value;
+            }
+        }
+    }
+
+    public
+    {
+        /++
+            Draws the object
+         +/
+        abstract void draw();
+    }
+}
+
+/++
     SpriteMap
  +/
-class SpriteMap : IDrawable
+class SpriteMap : PositionedDrawing
 {
     private
     {
@@ -209,7 +248,6 @@ class SpriteMap : IDrawable
         Size _frameSize;
         Image _spriteSheet;
         Paint _paint;
-        Point _position;
     }
 
     public
@@ -227,12 +265,22 @@ class SpriteMap : IDrawable
 
         @property
         {
+            /++
+                Position of the current sprite on the sprite sheet
+             +/
             Point currentSprite()
             {
                 return this._currentSprite;
             }
 
+            /++ ditto +/
             void currentSprite(Point value)
+            in
+            {
+                assert(value.x < (this._spriteSheet.width / this._frameSize.width));
+                assert(value.y < (this._spriteSheet.height / this._frameSize.height));
+            }
+            do
             {
                 this._currentSprite = value;
             }
@@ -240,9 +288,13 @@ class SpriteMap : IDrawable
 
         @property
         {
+            /++
+                Returns:
+                    Count of frames of this sprite map
+             +/
             uint frameCount()
             {
-                return ((1f * this._spriteSheet.Width / this._frameSize.Width)
+                return ((1f * this._spriteSheet.width / this._frameSize.width)
                         .floor.to!uint * (1f * this._spriteSheet.width / this._frameSize.height)
                         .floor.to!uint);
             }
@@ -250,28 +302,25 @@ class SpriteMap : IDrawable
 
         @property
         {
+            /++
+                Size of a single sprite on the sprite sheet
+             +/
             Size frameSize()
             {
                 return this._frameSize;
             }
 
+            /++ ditto +/
             void frameSize(Size value)
+            in
+            {
+                assert(this._spriteSheet.width % value.width == 0);
+                assert(this._spriteSheet.height % value.height == 0);
+            }
+            do
             {
                 this._frameSize = value;
                 this.updatePaint();
-            }
-        }
-
-        @property
-        {
-            Point position()
-            {
-                return this._position;
-            }
-
-            void position(Point value)
-            {
-                this._position = value;
             }
         }
 
@@ -282,13 +331,13 @@ class SpriteMap : IDrawable
              +/
             Image spriteSheet()
             {
-                return this._image;
+                return this._spriteSheet;
             }
 
             /++ ditto +/
             void spriteSheet(Image value)
             {
-                this._image = value;
+                this._spriteSheet = value;
                 this.updatePaint();
             }
         }
@@ -317,13 +366,13 @@ class SpriteMap : IDrawable
         /++
             Draws the current frame
          +/
-        void draw()
+        override void draw()
         {
-            this._paint.drawImage(this._position, tihs._frameSize);
+            this._paint.drawImage(this._position, this._frameSize);
         }
 
         /++
-            Move to the next frame of the sprite sheet
+            Moves to the next frame of the sprite sheet
          +/
         void nextFrame()
         {
@@ -352,9 +401,121 @@ class SpriteMap : IDrawable
     {
         void updatePaint()
         {
-            this._paint = darealNVGContext.imagePattern(this._currentSprite.x,
-                    this._currentSprite.y, this._frameSize.width,
-                    this._frameSize.height, this._image);
+            this._paint = darealNVGContext.imagePattern(this._currentSprite.x, this._currentSprite.y,
+                    this._frameSize.width, this._frameSize.height,
+                    fullDrawingAngle, this._spriteSheet);
+        }
+    }
+}
+
+/++
+    SpriteMap-based animation
+ +/
+class Animation : PositionedDrawing, IResetable
+{
+    private
+    {
+        SpriteMap _spriteMap;
+        bool _flipHorizontal;
+    }
+
+    public
+    {
+        @property
+        {
+            /++
+                Flip the drawing horizontal?
+             +/
+            bool flipHorizontal()
+            {
+                return this._flipHorizontal;
+            }
+
+            /++ ditto +/
+            void flipHorizontal(bool value)
+            {
+                this._flipHorizontal = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Sprite map on which the animation is based
+             +/
+            SpriteMap spriteMap()
+            {
+                return this._spriteMap;
+            }
+        }
+    }
+
+    /++
+        ctor
+     +/
+    public this(SpriteMap spriteMap)
+    {
+        this._spriteMap = spriteMap;
+    }
+
+    public
+    {
+        override void draw()
+        {
+            if (this._flipHorizontal)
+            {
+                darealNVGContext.save();
+                darealNVGContext.scale(-1, 1);
+                darealNVGContext.translate(((this._position.x * -2) - this._spriteMap._frameSize.width),
+                        0);
+                this._spriteMap.draw();
+                darealNVGContext.restore();
+            }
+            else
+            {
+                this._spriteMap.draw();
+            }
+        }
+
+        /++
+            Moves to the next animation frame
+         +/
+        void nextAnimationFrame()
+        {
+            this._spriteMap.nextFrame();
+        }
+
+        /++
+            Resets the animation to its first frame
+         +/
+        void reset()
+        {
+            this._spriteMap.currentSprite = Point(0, 0);
+        }
+    }
+}
+
+/++
+    Animation that implements IClocked
+ +/
+class ClockedAnimation : Animation, IClocked
+{
+    /++
+        ctor
+     +/
+    public this(SpriteMap spriteMap)
+    {
+        super(spriteMap);
+    }
+
+    public
+    {
+        /++
+            Moves to the next animation frame
+         +/
+        void nextTick()
+        {
+            this.nextAnimationFrame();
         }
     }
 }
