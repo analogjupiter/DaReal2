@@ -8,6 +8,7 @@
  +/
 module dareal.legacy.graphics;
 
+import std.algorithm.searching : canFind;
 import std.conv : to;
 import std.math : floor, PI;
 
@@ -199,11 +200,11 @@ deprecated("Wouldn't use that anymore. dareal.legacy also got rid of it :) ") cl
 }
 
 /++
-    Base class for drawings with a position
+    Base class for drawings with a specific position
  +/
 abstract class PositionedDrawing : IDrawable, IPositioned
 {
-    protected
+    private
     {
         Point _position;
     }
@@ -231,9 +232,73 @@ abstract class PositionedDrawing : IDrawable, IPositioned
     public
     {
         /++
-            Draws the object
+            Draws the object at its position
+
+            See_Also:
+                position
          +/
         abstract void draw();
+    }
+}
+
+/++
+    Base class for horizontally flippable drawings with a specific position
+ +/
+abstract class HorizontallyFlippablePositionedDrawing : PositionedDrawing
+{
+    private
+    {
+        bool _flipHorizontally;
+    }
+
+    public
+    {
+        @property
+        {
+            /++
+                Flip the drawing horizontal?
+             +/
+            bool flipHorizontally()
+            {
+                return this._flipHorizontally;
+            }
+
+            /++ ditto +/
+            void flipHorizontally(bool value)
+            {
+                this._flipHorizontally = value;
+            }
+        }
+    }
+
+    protected
+    {
+        /++
+            Helper function that simplifies drawing horizontally flipped objects
+
+            Also checks for .flipHorizontally().
+         +/
+        void drawHelperFlipHorizontally(int width, void function() doDrawing)
+        {
+            if (this.flipHorizontally)
+            {
+                darealNVGContext.save();
+                darealNVGContext.translate(width, 0);
+                darealNVGContext.scale(-1, 1);
+                doDrawing();
+                darealNVGContext.restore();
+            }
+            else
+            {
+                doDrawing();
+            }
+        }
+
+        /++ ditto +/
+        void drawHelperFlipHorizontally(int width, void delegate() doDrawing)
+        {
+            this.drawHelperFlipHorizontally(width, doDrawing.funcptr);
+        }
     }
 }
 
@@ -411,33 +476,15 @@ class SpriteMap : PositionedDrawing
 /++
     SpriteMap-based animation
  +/
-class Animation : PositionedDrawing, IResetable
+class Animation : HorizontallyFlippablePositionedDrawing, IResetable
 {
     private
     {
         SpriteMap _spriteMap;
-        bool _flipHorizontal;
     }
 
     public
     {
-        @property
-        {
-            /++
-                Flip the drawing horizontal?
-             +/
-            bool flipHorizontal()
-            {
-                return this._flipHorizontal;
-            }
-
-            /++ ditto +/
-            void flipHorizontal(bool value)
-            {
-                this._flipHorizontal = value;
-            }
-        }
-
         @property
         {
             /++
@@ -462,7 +509,7 @@ class Animation : PositionedDrawing, IResetable
     {
         override void draw()
         {
-            if (this._flipHorizontal)
+            /+if (this._flipHorizontally)
             {
                 darealNVGContext.save();
                 darealNVGContext.scale(-1, 1);
@@ -474,7 +521,9 @@ class Animation : PositionedDrawing, IResetable
             else
             {
                 this._spriteMap.draw();
-            }
+            }+/
+            this.drawHelperFlipHorizontally(this._spriteMap.frameSize.width,
+                    &this._spriteMap.draw);
         }
 
         /++
@@ -516,6 +565,187 @@ class ClockedAnimation : Animation, IClocked
         void nextTick()
         {
             this.nextAnimationFrame();
+        }
+    }
+}
+
+/++
+    Drawing based on multiple animations
+ +/
+class MultiAnimationDrawing : HorizontallyFlippablePositionedDrawing
+{
+    /++
+        Default name of the default animation
+     +/
+    enum defaultAnimationName = "default";
+
+    private
+    {
+        Animation[string] _animations;
+        Animation _currentAnimation;
+    }
+
+    public
+    {
+        @property
+        {
+            /++
+                Available animations
+             +/
+            auto animations()
+            {
+                return this._animations.byKeyValue;
+            }
+        }
+
+        @property
+        {
+            /++
+                Currently used animation
+             +/
+            Animation currentAnimation()
+            {
+                return this._currentAnimation;
+            }
+
+            /++ ditto +/
+            void currentAnimation(Animation value)
+            in
+            {
+                assert(this._animations.values.canFind(value));
+            }
+            do
+            {
+                // save old drawing data
+                bool flipHorizontally = this._currentAnimation.flipHorizontally;
+                Point position = this._currentAnimation.position;
+
+                // switch animation
+                this._currentAnimation = value;
+
+                // restore/apply old drawing data
+                this._currentAnimation.flipHorizontally = flipHorizontally;
+                this._currentAnimation.position = position;
+
+            }
+        }
+
+        @property
+        {
+            /++
+                Name of the currently used animation
+             +/
+            string currentAnimationName()
+            {
+                foreach (akvp; this._animations.byKeyValue)
+                {
+                    if (akvp.value == this._currentAnimation)
+                    {
+                        return akvp.key;
+                    }
+                }
+
+                // not found
+                assert(0);
+            }
+
+            /++ ditto +/
+            void currentAnimationName(string value)
+            {
+                Animation* a = (value in this._animations);
+                assert(a);
+                this.currentAnimation = *a;
+            }
+        }
+
+        override @property
+        {
+            bool flipHorizontally()
+            {
+                return this._currentAnimation.flipHorizontally;
+            }
+
+            void flipHorizontally(bool value)
+            {
+                this._currentAnimation.flipHorizontally = value;
+            }
+        }
+
+        override @property
+        {
+            Point position()
+            {
+                return this._currentAnimation.position;
+            }
+
+            void position(Point value)
+            {
+                this._currentAnimation.position = value;
+            }
+        }
+    }
+
+    /++
+        ctor
+     +/
+    public this(Animation defaultAnimation, string defaultAnimationName = defaultAnimationName)
+    {
+        this._animations[defaultAnimationName] = defaultAnimation;
+        this._currentAnimation = defaultAnimation;
+    }
+
+    public
+    {
+        /++
+            Draws the current animation
+         +/
+        override void draw()
+        {
+            this._currentAnimation.draw();
+        }
+
+        final
+        {
+            /++
+                Adds a new animation
+             +/
+            void addAnimation(string name, Animation animation)
+            in
+            {
+                assert((name in this._animations) == null);
+            }
+            do
+            {
+                this._animations[name] = animation;
+            }
+
+            /++
+                Removes the specified animation from the collection
+             +/
+            void removeAnimation(string name)
+            in
+            {
+                assert(name in this._animations);
+            }
+            do
+            {
+                this._animations.remove(name);
+            }
+
+            /++ ditto +/
+            void removeAnimation(Animation animation)
+            {
+                foreach (akvp; this._animations.byKeyValue)
+                {
+                    if (akvp.value == animation)
+                    {
+                        this.removeAnimation(akvp.key);
+                    }
+                }
+
+                // not found
+                assert(0);
+            }
         }
     }
 }
