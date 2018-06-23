@@ -57,6 +57,9 @@ void darealInit(NVGContext context)
     _darealNVGContext = context;
 }
 
+/++
+    Simplified image drawing function
+ +/
 void drawImage(Paint image, Point point, Size size)
 {
     darealNVGContext.beginPath();
@@ -256,7 +259,7 @@ abstract class HorizontallyFlippablePositionedDrawing : PositionedDrawing
         @property
         {
             /++
-                Flip the drawing horizontal?
+                Flip the drawing horizontally?
              +/
             bool flipHorizontally()
             {
@@ -278,7 +281,7 @@ abstract class HorizontallyFlippablePositionedDrawing : PositionedDrawing
 
             Also checks for .flipHorizontally().
          +/
-        void drawHelperFlipHorizontally(int width, void function() doDrawing)
+        void drawHelperFlipHorizontally(int width, void delegate() doDrawing)
         {
             if (this.flipHorizontally)
             {
@@ -292,12 +295,6 @@ abstract class HorizontallyFlippablePositionedDrawing : PositionedDrawing
             {
                 doDrawing();
             }
-        }
-
-        /++ ditto +/
-        void drawHelperFlipHorizontally(int width, void delegate() doDrawing)
-        {
-            this.drawHelperFlipHorizontally(width, doDrawing.funcptr);
         }
     }
 }
