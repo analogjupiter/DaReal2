@@ -32,7 +32,7 @@ __gshared private
 /++
     DaReal's drawing context
 
-    Use daRealInit to supply your own context.
+    Use daRealInit to supply your own one.
 
     See_Also:
         darealInit()
@@ -43,9 +43,9 @@ Context darealNVGContext()
 }
 
 /++
-    Drawing angle 180/PI
+    Drawing angle
  +/
-enum float fullDrawingAngle = (180 / PI);
+enum float fullDrawingAngle = 0;
 
 /++
     Specify a custom drawing context
@@ -60,10 +60,10 @@ void darealInit(NVGContext context)
 /++
     Simplified image drawing function
  +/
-void drawImage(Paint image, Point point, Size size)
+void drawImage(Paint image, Point position, Size size)
 {
     darealNVGContext.beginPath();
-    darealNVGContext.rect(point.x, point.y, size.width, size.height);
+    darealNVGContext.rect(position.x, position.y, size.width, size.height);
     darealNVGContext.fillPaint = image;
     darealNVGContext.fill();
 }
@@ -123,8 +123,8 @@ deprecated("Wouldn't use that anymore. dareal.legacy also got rid of it :) ") cl
 {
     private
     {
-        Image _image;
-        Paint _paint;
+        Image _image = void;
+        Paint _paint = void;
     }
 
     public
@@ -302,14 +302,14 @@ abstract class HorizontallyFlippablePositionedDrawing : PositionedDrawing
 /++
     SpriteMap
  +/
-class SpriteMap : PositionedDrawing
+final class SpriteMap : PositionedDrawing
 {
     private
     {
         Point _currentSprite;
-        Size _frameSize;
-        Image _spriteSheet;
-        Paint _paint;
+        Size _frameSize = void;
+        Image _spriteSheet = void;
+        Paint _paint = void;
     }
 
     public
@@ -339,8 +339,9 @@ class SpriteMap : PositionedDrawing
             void currentSprite(Point value)
             in
             {
-                assert(value.x < (this._spriteSheet.width / this._frameSize.width));
-                assert(value.y < (this._spriteSheet.height / this._frameSize.height));
+                enum msg = "invalid frame selection";
+                assert(value.x < (this._spriteSheet.width / this._frameSize.width), msg ~ " (x)");
+                assert(value.y < (this._spriteSheet.height / this._frameSize.height), msg ~ " (y)");
             }
             do
             {
@@ -376,12 +377,31 @@ class SpriteMap : PositionedDrawing
             void frameSize(Size value)
             in
             {
-                assert(this._spriteSheet.width % value.width == 0);
-                assert(this._spriteSheet.height % value.height == 0);
+                enum msg = "bad frameSize";
+                assert(this._spriteSheet.width % value.width == 0, msg ~ " (width)");
+                assert(this._spriteSheet.height % value.height == 0, msg ~ " (height)");
             }
             do
             {
                 this._frameSize = value;
+                this.updatePaint();
+            }
+        }
+
+        override @property
+        {
+            /++
+                Position of the drawing
+             +/
+            Point position()
+            {
+                return this._position;
+            }
+
+            /++ ditto +/
+            void position(Point value)
+            {
+                this._position = value;
                 this.updatePaint();
             }
         }
@@ -408,19 +428,21 @@ class SpriteMap : PositionedDrawing
     /++
         ctor for single-sprite sprite sheets
      +/
-    public this(Image spriteSheet)
+    public this(Image spriteSheet, Point position = Point(0, 0))
     {
-        this._frameSize = Size(spriteSheet.width, spriteSheet.height);
-        this.spriteSheet = spriteSheet;
+        this._position = position;
+        this._spriteSheet = spriteSheet;
+        this.frameSize = Size(spriteSheet.width, spriteSheet.height);
     }
 
     /++
         ctor
      +/
-    public this(Image spriteSheet, Size frameSize)
+    public this(Image spriteSheet, Size frameSize, Point position = Point(0, 0))
     {
-        this._frameSize = frameSize;
-        this.spriteSheet = spriteSheet;
+        this._position = position;
+        this._spriteSheet = spriteSheet;
+        this.frameSize = frameSize;
     }
 
     public
@@ -437,10 +459,19 @@ class SpriteMap : PositionedDrawing
             Moves to the next frame of the sprite sheet
          +/
         void nextFrame()
+        out
+        {
+            enum msg = "moved to bad sprite sheet frame";
+            assert((this._currentSprite.x * this._frameSize.width) <= this._spriteSheet.width, msg);
+            assert((this._currentSprite.y * this._frameSize.height) <= this._spriteSheet.height,
+                    msg);
+        }
+        do
         {
             // Row end?
-            if (((this._currentSprite.y + 1) * this._frameSize.width) >= this._spriteSheet.width)
+            if (((this._currentSprite.x + 1) * this._frameSize.width) >= this._spriteSheet.width)
             {
+                this._currentSprite.x = 0;
                 ++this._currentSprite.y;
 
                 // Last row?
@@ -459,12 +490,14 @@ class SpriteMap : PositionedDrawing
         }
     }
 
-    protected
+    private
     {
         void updatePaint()
         {
-            this._paint = darealNVGContext.imagePattern(this._currentSprite.x, this._currentSprite.y,
-                    this._frameSize.width, this._frameSize.height,
+            this._paint = darealNVGContext.imagePattern(
+                    ((this._currentSprite.x * this._frameSize.width * -1) + this._position.x),
+                    ((this._currentSprite.y * this._frameSize.height * -1) + this._position.y),
+                    this._spriteSheet.width, this._spriteSheet.height,
                     fullDrawingAngle, this._spriteSheet);
         }
     }
@@ -490,6 +523,19 @@ class Animation : HorizontallyFlippablePositionedDrawing, IResetable
             SpriteMap spriteMap()
             {
                 return this._spriteMap;
+            }
+        }
+
+        override @property
+        {
+            Point position()
+            {
+                return this._spriteMap.position;
+            }
+
+            void position(Point value)
+            {
+                this._spriteMap.position = value;
             }
         }
     }
@@ -530,6 +576,9 @@ class Animation : HorizontallyFlippablePositionedDrawing, IResetable
         {
             this._spriteMap.nextFrame();
         }
+
+        /++ ditto +/
+        alias nextFrame = nextAnimationFrame;
 
         /++
             Resets the animation to its first frame
@@ -650,7 +699,7 @@ class MultiAnimationDrawing : HorizontallyFlippablePositionedDrawing
             void currentAnimationName(string value)
             {
                 Animation* a = (value in this._animations);
-                assert(a);
+                assert(a, "cannot activate unknow animation");
                 this.currentAnimation = *a;
             }
         }
@@ -709,7 +758,7 @@ class MultiAnimationDrawing : HorizontallyFlippablePositionedDrawing
             void addAnimation(string name, Animation animation)
             in
             {
-                assert((name in this._animations) == null);
+                assert((name in this._animations) == null, "animation name is already in use");
             }
             do
             {
@@ -722,7 +771,7 @@ class MultiAnimationDrawing : HorizontallyFlippablePositionedDrawing
             void removeAnimation(string name)
             in
             {
-                assert(name in this._animations);
+                assert(name in this._animations, "cannot remove unknown animation");
             }
             do
             {
@@ -741,8 +790,22 @@ class MultiAnimationDrawing : HorizontallyFlippablePositionedDrawing
                 }
 
                 // not found
-                assert(0);
+                assert(0, "cannot remove unknown animation");
             }
         }
+    }
+}
+
+/++
+    Multi-animation sprite
+ +/
+class Sprite : MultiAnimationDrawing
+{
+    /++
+        ctor
+     +/
+    public this(Animation defaultAnimation, string defaultAnimationName = defaultAnimationName)
+    {
+        super(defaultAnimation, defaultAnimationName);
     }
 }
