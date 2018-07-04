@@ -283,11 +283,11 @@ abstract class HorizontallyFlippablePositionedDrawing : PositionedDrawing
          +/
         void drawHelperFlipHorizontally(int width, void delegate() doDrawing)
         {
-            if (this.flipHorizontally)
+            if (this._flipHorizontally)
             {
                 darealNVGContext.save();
-                darealNVGContext.translate(width, 0);
                 darealNVGContext.scale(-1, 1);
+                darealNVGContext.translate(((this.position.x * -2) - width), 0);
                 doDrawing();
                 darealNVGContext.restore();
             }
