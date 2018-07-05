@@ -809,3 +809,85 @@ class Sprite : MultiAnimationDrawing
         super(defaultAnimation, defaultAnimationName);
     }
 }
+
+/++
+    Decorator for drawings that can be hidden
+ +/
+final class OptionallyInvisibleDrawing : IDrawable
+{
+    private
+    {
+        bool _invisible = void;
+        IDrawable _drawing = void;
+    }
+
+    public
+    {
+        @property
+        {
+            /++
+                Is the drawing hidden?
+             +/
+            bool invisible()
+            {
+                return this._invisible;
+            }
+
+            /++ ditto +/
+            void invisible(bool value)
+            {
+                this._invisible = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Is the drawing visible?
+             +/
+            bool visible()
+            {
+                return (!this._invisible);
+            }
+
+            /++ ditto +/
+            void visible(bool value)
+            {
+                this._invisible = (!value);
+            }
+        }
+    }
+
+    /++
+        ctor
+     +/
+    public this(IDrawable drawing, bool invisible = true)
+    {
+        this._drawing = drawing;
+        this._invisible = invisible;
+    }
+
+    public
+    {
+        /++
+            Toggles visibility state
+         +/
+        void toggleVisibility()
+        {
+            this._invisible = (!this._invisible);
+        }
+
+        /++
+            Draws the decorated drawing if not invisible
+         +/
+        void draw()
+        {
+            if (this._invisible)
+            {
+                return;
+            }
+
+            this._drawing.draw();
+        }
+    }
+}
