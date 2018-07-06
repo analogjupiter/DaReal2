@@ -15,7 +15,6 @@ import std.math : floor, PI;
 import arsd.nanovega;
 import dareal.legacy.math;
 import dareal.legacy.interfaces;
-import tinyevent;
 
 public
 {
@@ -66,53 +65,6 @@ void drawImage(Paint image, Point position, Size size)
     darealNVGContext.rect(position.x, position.y, size.width, size.height);
     darealNVGContext.fillPaint = image;
     darealNVGContext.fill();
-}
-
-/++
-    Camera-like object that provides the point of view
- +/
-class Camera
-{
-    alias CameraOffsetChangedEvent = Event!(Camera, Point);
-
-    private
-    {
-        CameraOffsetChangedEvent _cameraOffsetChanged;
-        Point _offset;
-    }
-
-    public
-    {
-        @property
-        {
-            /++
-                Event that triggers when the camera's offset changes
-             +/
-            CameraOffsetChangedEvent cameraOffsetChanged()
-            {
-                return this._cameraOffsetChanged;
-            }
-        }
-
-        @property
-        {
-            /++
-                Camera offset
-             +/
-            Point offset()
-            {
-                return this._offset;
-            }
-
-            /++ ditto +/
-            void offset(Point value)
-            {
-                auto old = this._offset;
-                this._offset = value;
-                this.cameraOffsetChanged.emit(this, old);
-            }
-        }
-    }
 }
 
 /++
@@ -287,7 +239,7 @@ abstract class HorizontallyFlippablePositionedDrawing : PositionedDrawing
             {
                 darealNVGContext.save();
                 darealNVGContext.scale(-1, 1);
-                darealNVGContext.translate(((this.position.x * -2) - width), 0);
+                darealNVGContext.translate(-((this.position.x * 2) + width), 0);
                 doDrawing();
                 darealNVGContext.restore();
             }
@@ -797,7 +749,7 @@ class MultiAnimationDrawing : HorizontallyFlippablePositionedDrawing
 }
 
 /++
-    Multi-animation sprite
+    Multi-animation software sprite
  +/
 class Sprite : MultiAnimationDrawing
 {

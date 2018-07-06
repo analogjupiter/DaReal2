@@ -26,5 +26,6 @@ module dareal.legacy;
 public:
 import dareal.legacy.graphics;
 import dareal.legacy.interfaces;
+import dareal.legacy.layereddrawing;
 import dareal.legacy.math;
 import dareal.legacy.timing;
