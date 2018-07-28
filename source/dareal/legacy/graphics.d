@@ -16,6 +16,25 @@ import arsd.nanovega;
 import dareal.legacy.math;
 import dareal.legacy.interfaces;
 
+public import arsd.nanovega : createImage;
+
+/++
+    Initializes dareal.legacy.graphics
+
+    This must be called before anything else of dareal.legacy.graphics!
+ +/
+NVGContext darealInit()
+{
+    _darealNVGContext = nvgCreateContext();
+    return _darealNVGContext;
+}
+
+/++ ditto +/
+void darealInit(NVGContext context)
+{
+    _darealNVGContext = context;
+}
+
 public
 {
     alias Image = NVGImage;
@@ -31,7 +50,7 @@ __gshared private
 /++
     DaReal's drawing context
 
-    Use daRealInit to supply your own one.
+    Use daRealInit to supply one.
 
     See_Also:
         darealInit()
@@ -45,16 +64,6 @@ Context darealNVGContext()
     Drawing angle
  +/
 enum float fullDrawingAngle = 0;
-
-/++
-    Specify a custom drawing context
-
-    This must be called before anything else of dareal.legacy.graphics.
- +/
-void darealInit(NVGContext context)
-{
-    _darealNVGContext = context;
-}
 
 /++
     Simplified image drawing function
