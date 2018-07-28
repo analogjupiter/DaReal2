@@ -11,6 +11,10 @@
 
     "targetPath": "bin",
 
+    "buildRequirements": [
+        "allowWarnings"
+    ],
+
     "dependencies": {
         "arsd-official:nanovega": "~>2.1.0",
         "eventsystem": "~>1.2.0"
