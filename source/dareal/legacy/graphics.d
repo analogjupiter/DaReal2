@@ -37,9 +37,10 @@ void darealInit(NVGContext context)
 
 public
 {
+    alias Context = NVGContext;
+    alias Color = NVGColor;
     alias Image = NVGImage;
     alias Paint = NVGPaint;
-    alias Context = NVGContext;
 }
 
 __gshared private
@@ -851,4 +852,230 @@ final class OptionallyInvisibleDrawing : IDrawable
             this._drawing.draw();
         }
     }
+}
+
+/++
+    Font face wrapper
+ +/
+final class FontFace
+{
+    /++
+        Font face ID
+     +/
+    int id;
+
+    /++
+        Friendly alias name
+     +/
+    string aliasName;
+
+    /++
+        ctor for loading new fonts
+     +/
+    this(string aliasName, string ttfPath)
+    out
+    {
+        assert(this.id != FONS_INVALID, "Failed to load font `" ~ ttfPath ~ "`");
+    }
+    do
+    {
+        this.aliasName = aliasName;
+        this.id = darealNVGContext.createFont(aliasName, ttfPath);
+    }
+
+    /++
+        ctor for already loaded fonts
+     +/
+    this(int fontFaceID, string aliasName)
+    in
+    {
+        assert(fontFaceID != FONS_INVALID);
+    }
+    do
+    {
+        this.id = fontFaceID;
+        this.aliasName = aliasName;
+    }
+
+    /++
+        ctor for already loaded fonts
+     +/
+    this(int fontFaceID)
+    in
+    {
+        assert(fontFaceID != FONS_INVALID);
+    }
+    do
+    {
+        this.id = fontFaceID;
+    }
+}
+
+/++
+    Drawable text
+ +/
+final class Text(bool multilineBlock) : PositionedDrawing
+{
+    private
+    {
+        Color _color;
+        FontFace _fontFace;
+        float _fontSize;
+        string _text;
+    }
+
+    public
+    {
+        @property
+        {
+            /++
+                Text color
+             +/
+            Color color()
+            {
+                return this._color;
+            }
+
+            /++ ditto +/
+            void color(Color value)
+            {
+                this._color = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Font face to use
+             +/
+            FontFace fontFace()
+            {
+                return this._fontFace;
+            }
+
+            /++ ditto +/
+            void font(FontFace value)
+            {
+                this._fontFace = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Display size of text
+             +/
+            float fontSize()
+            {
+                return this._fontSize;
+            }
+
+            /++ ditto +/
+            void fontSize(float value)
+            {
+                this.fontSize = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Text to display
+             +/
+            string text()
+            {
+                return this._text;
+            }
+
+            /++ ditto +/
+            void text(string value)
+            {
+                this._text = value;
+            }
+        }
+    }
+
+    static if (multilineBlock)
+    {
+        /++
+            multi-line text ctor
+         +/
+        public this(string text, FontFace fontFace, float fontSize, Color color,
+                float lineWidth, Point position)
+        {
+            this._text = text;
+            this._fontFace = fontFace;
+            this._fontSize = fontSize;
+            this._color = color;
+            this._lineWidth = lineWidth;
+            this._position = position;
+        }
+
+        private float _lineWidth;
+
+        public @property
+        {
+            /++
+                Max width of a text line
+             +/
+            float lineWidth()
+            {
+                return this._lineWidth;
+            }
+
+            /++ ditto +/
+            void lineWidth(float value)
+            {
+                this._lineWidth = value;
+            }
+        }
+
+    }
+    else
+    {
+        /++
+            single-line text ctor
+         +/
+        public this(string text, FontFace fontFace, float fontSize, Color color, Point position)
+        {
+            this._text = text;
+            this._fontFace = fontFace;
+            this._fontSize = fontSize;
+            this._color = color;
+            this._position = position;
+        }
+    }
+
+    public override
+    {
+        void draw()
+        {
+            darealNVGContext.fillColor = this._color;
+            darealNVGContext.fontFaceId = this._fontFace.id;
+            darealNVGContext.fontSize = this._fontSize;
+
+            static if (multilineBlock)
+            {
+                darealNVGContext.textBox(this._position.x, this._position.y,
+                        this._lineWidth, this._text);
+            }
+            else
+            {
+                darealNVGContext.text(this._position.x, this._position.y, this._text);
+            }
+        }
+    }
+}
+
+public
+{
+    /++
+        Single-line text
+     +/
+    alias TextLine = Text!false;
+
+    /++
+        Multi-line text
+     +/
+    alias TextBlock = Text!true;
 }
