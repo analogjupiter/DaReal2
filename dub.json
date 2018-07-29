@@ -1,6 +1,6 @@
 {
     "name": "dareal2",
-    "description": "🎮️⚙️ DaReal² Engine",
+    "description": "🎮️⚙️ DaReal² Toolkit",
 
     "copyright": "Copyright © 2018  0xEAB",
     "license": "MPL-2.0",
@@ -9,14 +9,34 @@
         "Elias Batek (0xEAB)"
     ],
 
-    "targetPath": "bin",
-
-    "buildRequirements": [
-        "allowWarnings"
-    ],
+    "targetType": "none",
 
     "dependencies": {
-        "arsd-official:nanovega": "~>2.1.0",
-        "eventsystem": "~>1.2.0"
-    }
+        "dareal2:legacy": "*",
+        "dareal2:util": "*"
+    },
+
+    "subPackages": [
+        {
+            "name": "legacy",
+            "sourcePaths": [ "source/legacy/dareal/legacy" ],
+            "importPaths": [ "source/legacy" ],
+            "targetPath": "bin",
+
+            "buildRequirements": [
+                "allowWarnings"
+            ],
+
+            "dependencies": {
+                "arsd-official:nanovega": "~>2.1.0",
+                "eventsystem": "~>1.2.0"
+            }
+        },
+        {
+            "name": "util",
+            "sourcePaths": [ "source/util/dareal/util" ],
+            "importPaths": [ "source/util" ],
+            "targetPath": "bin"
+        }
+    ]
 }
