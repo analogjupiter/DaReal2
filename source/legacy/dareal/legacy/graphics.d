@@ -772,7 +772,7 @@ class Sprite : MultiAnimationDrawing
              +/
             Size size()
             {
-                this._currentAnimation.spriteMap.frameSize;
+                return this._currentAnimation.spriteMap.frameSize;
             }
         }
     }
