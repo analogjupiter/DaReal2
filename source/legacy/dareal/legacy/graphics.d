@@ -763,6 +763,20 @@ class MultiAnimationDrawing : HorizontallyFlippablePositionedDrawing
  +/
 class Sprite : MultiAnimationDrawing
 {
+    public
+    {
+        @property
+        {
+            /++
+                Size of the drawn sprite
+             +/
+            Size size()
+            {
+                this._currentAnimation.spriteMap.frameSize;
+            }
+        }
+    }
+
     /++
         ctor
      +/
