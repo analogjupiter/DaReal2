@@ -330,6 +330,7 @@ struct Task(bool useDelegate = true)
     this(CallbackType callback)
     {
         this.callback = callback;
+        this._semaphore = new SemaphoreX(0);
     }
 
     /++
