@@ -58,6 +58,7 @@ final class SemaphoreX : Semaphore
     public this(uint count = 0)
     {
         super(count);
+        this._counter = -(int(count));
         this._mutex = new Mutex();
     }
 
