@@ -11,10 +11,20 @@ module dareal.util.path;
 /++
     Returns: folder where the program's executable is located in
  +/
-string thisExeDir()
+string thisExeDir() @safe
 {
     import std.path : dirName;
     import std.file : thisExePath;
 
     return thisExePath.dirName;
+}
+
+/++
+    Returns: pure filename without directories or the extension
+ +/
+string pureFileName(R)(R filePath) @safe pure nothrow @nogc
+{
+    import std.path : baseName, stripExtension;
+
+    return filePath.baseName.stripExtension;
 }
