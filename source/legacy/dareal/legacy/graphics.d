@@ -784,6 +784,14 @@ class Sprite : MultiAnimationDrawing
     {
         super(defaultAnimation, defaultAnimationName);
     }
+
+    /++
+        convenience ctor
+     +/
+    public this(SpriteMap spriteMap, string defaultAnimationName = defaultAnimationName)
+    {
+        this(new Animation(spriteMap), defaultAnimationName);
+    }
 }
 
 /++
