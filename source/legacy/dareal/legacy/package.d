@@ -24,6 +24,7 @@
 module dareal.legacy;
 
 public:
+import dareal.legacy.cheapgui;
 import dareal.legacy.graphics;
 import dareal.legacy.interfaces;
 import dareal.legacy.layereddrawing;
