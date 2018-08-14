@@ -968,7 +968,7 @@ final class Text(bool multilineBlock) : PositionedDrawing
             }
 
             /++ ditto +/
-            void font(FontFace value)
+            void fontFace(FontFace value)
             {
                 this._fontFace = value;
             }
