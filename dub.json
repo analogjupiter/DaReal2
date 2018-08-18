@@ -13,6 +13,7 @@
 
     "dependencies": {
         "dareal2:legacy": "*",
+        "dareal2:platformer": "*",
         "dareal2:util": "*"
     },
 
@@ -31,6 +32,12 @@
                 "arsd-official:nanovega": "~>2.1.0",
                 "eventsystem": "~>1.2.0"
             }
+        },
+        {
+            "name": "platformer",
+            "sourcePaths": [ "source/platformer/dareal/platformer" ],
+            "importPaths": [ "source/platformer" ],
+            "targetPath": "bin"
         },
         {
             "name": "util",
