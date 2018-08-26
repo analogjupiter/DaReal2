@@ -257,10 +257,10 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
     immutable size_t aX = blockPositionX / mxcr.tileSize;
     immutable size_t aY = blockPositionY / mxcr.tileSize;
 
-    immutable size_t bX = blockPositionX - 1 + blockWidth / mxcr.tileSize;
-    immutable size_t bY = blockPositionY - 1 + blockHeight / mxcr.tileSize;
+    immutable size_t bX = (blockPositionX + blockWidth - 1) / mxcr.tileSize;
+    immutable size_t bY = (blockPositionY + blockHeight - 1) / mxcr.tileSize;
 
-    static if (ScanProcedure == ScanProcedure.rowByRow)
+    static if (scanProcedure == ScanProcedure.rowByRow)
     {
         for (size_t y = aY; y <= bY; ++y)
         {
@@ -287,7 +287,7 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
         {
             if (matrix[y1][x1] || matrix[y2][x2] || matrix[y1][x2] || matrix[y2][x1])
             {
-                //return true;
+                return true;
             }
 
             if (x1 < x05)
@@ -302,7 +302,7 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
                 }
                 else if (y1 == y05)
                 {
-                    break;
+                    return false;
                 }
 
                 if (y2 > y05)
