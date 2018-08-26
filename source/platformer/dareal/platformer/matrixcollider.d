@@ -13,6 +13,8 @@
     This allows to allows to query the matrix instead of iterating over the blocks every check.
     In order to reduce the memory usage one might consider splitting the whole block data
     into seperate collision domains.
+
+    This does not support negative positions.
  +/
 module dareal.platformer.matrixcollider;
 
@@ -162,6 +164,171 @@ Matrix newMatrix(size_t matrixWidth, size_t matrixHeight) nothrow
 }
 
 /++
+    Scan procedures for collision detections
+ +/
+enum ScanProcedure
+{
+    /++
+        Basic "foreach" scanning
+        - row by row, one coll after another
+
+        Example:
+            [3x3]
+            (0/0), (0/1), (0/2), (1/0), (1/1), ...
+     +/
+    rowByRow,
+
+    /++
+        Complex approach checking corners first
+        - row by row - from the outside in,
+        from left to the center
+        and from right to the center
+
+        Overhead: 4 counters
+
+        Odd sizes will result in duplicated checks.
+        Results will be slow if the collision happens somewhere in the middle.
+        Moreover, this will be rather slow if there's no collision.
+
+        Example:
+            [2x5]                       // <-- odd height
+
+            center := (1+0)/2 = 0
+            middle := (4+0)/2 = 2
+
+            (0/0), (1/4), (1/0), (0/4)
+            (0/1), (1/3), (1/1), (0/3)
+            (0/2), (1/2), (1/2), (0/2)  // <-- duplicates
+
+            --> up to 4x3 checks in this example
+
+        -----------------------------------------------------------
+
+            [4x4]                       // <-- both even, best case
+
+            center := (3+0)/2 = 1
+            middle := (3+0)/2 = 1
+
+            (0/0), (3/3), (3/0), (0/3)
+            (1/0), (2/3), (2/0), (1/3)
+            (0/1), (3/2), (3/1), (0/2)
+            (1/1), (2/2), (2/1), (1/2)
+
+            --> up to 4x4 checks in this example
+
+        -----------------------------------------------------------
+
+        Example:
+            [5x5]                       // <-- both odd, worst case
+
+            center := (4+0)/2 = 2
+            middle := (4+0)/2 = 2
+
+            (0/0), (4/4), (4/0), (0/4)
+            (1/0), (3/4), (3/0), (1/4)
+            (2/0), (2/4), (2/0), (2/4)  // <-- duplicates
+            (0/1), (4/3), (4/1), (0/3)
+            (1/1), (3/3), (3/1), (1/3)
+            (2/1), (2/3), (2/1), (2/3)  // <-- duplicates
+            (0/2), (4/2), (4/2), (0/2)  // <-- duplicates
+            (1/2), (3/2), (3/2), (1/2)
+            (2/2), (2/2), (2/2), (2/2)  // <-- duplicates
+
+            --> up to 9x4 checks in this example
+     +/
+    topLeftBottomRight,
+}
+
+/++
+    Calculates if a collision occured for the passed block
+ +/
+bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D, Block)(
+        MatrixCollider mxcr, Matrix2D matrix, Block block) if (isBlockType!Block)
+{
+    pragma(inline, true);
+    return mxcr.collide(matrix, block.position.x, block.position.y,
+            block.size.width, block.size.height);
+}
+
+/++ ditto +/
+bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(MatrixCollider mxcr, Matrix2D matrix,
+        size_t blockPositionX, size_t blockPositionY, size_t blockWidth, size_t blockHeight)
+{
+    immutable size_t aX = blockPositionX / mxcr.tileSize;
+    immutable size_t aY = blockPositionY / mxcr.tileSize;
+
+    immutable size_t bX = blockPositionX - 1 + blockWidth / mxcr.tileSize;
+    immutable size_t bY = blockPositionY - 1 + blockHeight / mxcr.tileSize;
+
+    static if (ScanProcedure == ScanProcedure.rowByRow)
+    {
+        for (size_t y = aY; y <= bY; ++y)
+        {
+            for (size_t x = aX; x <= bX; ++x)
+            {
+                if (matrix[y][x])
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    else static if (scanProcedure == ScanProcedure.topLeftBottomRight)
+    {
+        immutable size_t y05 = (bY + aY) / 2;
+        immutable size_t x05 = (bX + aX) / 2;
+
+        size_t x1 = aX;
+        size_t x2 = bX;
+
+        size_t y1 = aY;
+        size_t y2 = bY;
+        while (true)
+        {
+            if (matrix[y1][x1] || matrix[y2][x2] || matrix[y1][x2] || matrix[y2][x1])
+            {
+                //return true;
+            }
+
+            if (x1 < x05)
+            {
+                ++x1;
+            }
+            else if (x1 == x05)
+            {
+                if (y1 < y05)
+                {
+                    ++y1;
+                }
+                else if (y1 == y05)
+                {
+                    break;
+                }
+
+                if (y2 > y05)
+                {
+                    --y2;
+                }
+
+                x1 = aX;
+                x2 = bX;
+                continue;
+            }
+
+            if (x2 > x05)
+            {
+                --x2;
+            }
+        }
+    }
+    else
+    {
+        static assert("No implementation for scan procedure: " ~ scanProcedure);
+    }
+    return false;
+}
+
+/++
     Collision matrices collection
 
     See_Also:
@@ -172,7 +339,7 @@ struct WorldMatrices
     /++
         Collision matrix for wall blocks
      +/
-    Matrix wallBlocks;
+    Matrix walls;
 
     /++
         Collision matrix for jump-through blocks
