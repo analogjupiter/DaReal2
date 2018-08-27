@@ -237,6 +237,18 @@ enum ScanProcedure
             --> up to 9x4 checks in this example
      +/
     topLeftBottomRight,
+
+    /++
+        Quick scan that will only check the outer rectangle
+
+        Example:
+            [5x4]
+            (4/3), (3/3), (2/3), (1/3), // <-- bottom
+            (0/0), (1/0), (2/0), (3/0), // <-- top
+            (4/0), (4/1), (4/2),        // <-- right
+            (0/3), (0/2), (0/1),        // <-- left
+     +/
+    borderOnly,
 }
 
 /++
@@ -280,9 +292,9 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
 
         size_t x1 = aX;
         size_t x2 = bX;
-
         size_t y1 = aY;
         size_t y2 = bY;
+
         while (true)
         {
             if (matrix[y1][x1] || matrix[y2][x2] || matrix[y1][x2] || matrix[y2][x1])
@@ -318,6 +330,40 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
             if (x2 > x05)
             {
                 --x2;
+            }
+        }
+    }
+    else static if (scanProcedure == ScanProcedure.borderOnly)
+    {
+        for (size_t x = bX; x > aX; --x)
+        {
+            if (matrix[bY][x])
+            {
+                return true;
+            }
+        }
+
+        for (size_t x = aX; x < bX; ++x)
+        {
+            if (matrix[aY][x])
+            {
+                return true;
+            }
+        }
+
+        for (size_t y = aY; y < bY; ++y)
+        {
+            if (matrix[y][bX])
+            {
+                return true;
+            }
+        }
+
+        for (size_t y = bY; y > 0; --y)
+        {
+            if (matrix[y][aX])
+            {
+                return true;
             }
         }
     }
