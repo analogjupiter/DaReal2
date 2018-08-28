@@ -285,6 +285,51 @@ enum ScanProcedure
             (0/0), (1/0), (2/0), (3/0), (4/0)
      +/
     borderTopOnly,
+
+    /++
+        Quick scan that will only process the corners
+
+        Example:
+            [5x5]
+            (0/0), (4/4), (0/4), (4/0)
+     +/
+    cornersOnly,
+
+    /++
+        Single column scan that will only process the top left corner
+
+        Example:
+            [5x5]
+            (0/0)
+     +/
+    cornerTopLeftOnly,
+
+    /++
+        Single column scan that will only process the top right corner
+
+        Example:
+            [5x5]
+            (4/0)
+     +/
+    cornerTopRightOnly,
+
+    /++
+        Single column scan that will only process the bottom left corner
+
+        Example:
+            [5x5]
+            (0/4)
+     +/
+    cornerBottomLeftOnly,
+
+    /++
+        Single column scan that will only process the bottom right corner
+
+        Example:
+            [5x5]
+            (4/4)
+     +/
+    cornerBottomRightOnly,
 }
 
 /++
@@ -302,22 +347,30 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D, Blo
 bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(MatrixCollider mxcr, Matrix2D matrix,
         size_t blockPositionX, size_t blockPositionY, size_t blockWidth, size_t blockHeight)
 {
-    static if (scanProcedure != ScanProcedure.borderRightOnly)
+    static if (scanProcedure != ScanProcedure.borderRightOnly
+            && scanProcedure != ScanProcedure.cornerBottomRightOnly
+            && scanProcedure != ScanProcedure.cornerTopRightOnly)
     {
         immutable size_t aX = blockPositionX / mxcr.tileSize;
     }
 
-    static if (scanProcedure != ScanProcedure.borderBottomOnly)
+    static if (scanProcedure != ScanProcedure.borderBottomOnly
+            && scanProcedure != ScanProcedure.cornerBottomLeftOnly
+            && scanProcedure != ScanProcedure.cornerBottomRightOnly)
     {
         immutable size_t aY = blockPositionY / mxcr.tileSize;
     }
 
-    static if (scanProcedure != ScanProcedure.borderLeftOnly)
+    static if (scanProcedure != ScanProcedure.borderLeftOnly
+            && scanProcedure != ScanProcedure.cornerBottomLeftOnly
+            && scanProcedure != ScanProcedure.cornerTopLeftOnly)
     {
         immutable size_t bX = (blockPositionX + blockWidth) / mxcr.tileSize - 1;
     }
 
-    static if (scanProcedure != ScanProcedure.borderTopOnly)
+    static if (scanProcedure != ScanProcedure.borderTopOnly
+            && scanProcedure != ScanProcedure.cornerTopLeftOnly
+            && scanProcedure != ScanProcedure.cornerTopRightOnly)
     {
         immutable size_t bY = (blockPositionY + blockHeight) / mxcr.tileSize - 1;
     }
@@ -334,6 +387,8 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
                 }
             }
         }
+
+        return false;
     }
     else static if (scanProcedure == ScanProcedure.topLeftBottomRight)
     {
@@ -382,6 +437,8 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
                 --x2;
             }
         }
+
+        return false;
     }
     else static if (scanProcedure == ScanProcedure.borderOnly)
     {
@@ -416,6 +473,8 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
                 return true;
             }
         }
+
+        return false;
     }
     else static if (scanProcedure == ScanProcedure.borderBottomOnly)
     {
@@ -426,6 +485,8 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
                 return true;
             }
         }
+
+        return false;
     }
     else static if (scanProcedure == ScanProcedure.borderLeftOnly)
     {
@@ -436,6 +497,8 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
                 return true;
             }
         }
+
+        return false;
     }
     else static if (scanProcedure == ScanProcedure.borderRightOnly)
     {
@@ -446,6 +509,8 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
                 return true;
             }
         }
+
+        return false;
     }
     else static if (scanProcedure == ScanProcedure.borderTopOnly)
     {
@@ -456,13 +521,40 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
                 return true;
             }
         }
+
+        return false;
+    }
+    else static if (scanProcedure == ScanProcedure.cornersOnly)
+    {
+        pragma(inline, true);
+        return (matrix[aY][aX] || matrix[bY][bX] || matrix[aY][bX] || matrix[bY][aX]);
+    }
+    else static if (scanProcedure == ScanProcedure.cornerTopLeftOnly)
+    {
+        pragma(inline, true);
+        return (matrix[aY][aX]);
+    }
+    else static if (scanProcedure == ScanProcedure.cornerTopRightOnly)
+    {
+        pragma(inline, true);
+        return (matrix[aY][bX]);
+    }
+    else static if (scanProcedure == ScanProcedure.cornerBottomLeftOnly)
+    {
+        pragma(inline, true);
+        return (matrix[bY][aX]);
+    }
+    else static if (scanProcedure == ScanProcedure.cornerBottomRightOnly)
+    {
+        pragma(inline, true);
+        return (matrix[bY][bX]);
     }
     else
     {
-        static assert("No implementation for scan procedure: " ~ scanProcedure);
-    }
+        import std.conv : to;
 
-    return false;
+        static assert(0, "No implementation for scan procedure: " ~ scanProcedure.to!string);
+    }
 }
 
 /++
