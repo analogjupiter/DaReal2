@@ -114,7 +114,7 @@ void insertMatrix(Matrix2D, Block)(MatrixCollider mxcr, Matrix2D matrix, Block b
 }
 
 /++
-    Adds a block to the collision matrix
+    Flags a block in the collision matrix
  +/
 void insertMatrix(Matrix2D)(MatrixCollider mxcr, Matrix2D matrix,
         size_t blockPositionX, size_t blockPositionY, size_t blockWidth, size_t blockHeight)
@@ -124,8 +124,8 @@ void insertMatrix(Matrix2D)(MatrixCollider mxcr, Matrix2D matrix,
     immutable size_t aX = blockPositionX / mxcr.tileSize;
     immutable size_t aY = blockPositionY / mxcr.tileSize;
 
-    immutable size_t bX = blockPositionX - 1 + blockWidth / mxcr.tileSize;
-    immutable size_t bY = blockPositionY - 1 + blockHeight / mxcr.tileSize;
+    immutable size_t bX = (blockPositionX + blockWidth) / mxcr.tileSize - 1;
+    immutable size_t bY = (blockPositionY + blockHeight) / mxcr.tileSize - 1;
 
     for (size_t y = aY; y < bY; ++y)
     {
