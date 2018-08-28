@@ -249,10 +249,46 @@ enum ScanProcedure
             (0/3), (0/2), (0/1),        // <-- left
      +/
     borderOnly,
+
+    /++
+        Quick scan that will only process the bottom border
+
+        Example:
+            [5x4]
+            (0/3), (1/3), (2/3), (3/3), (4/3)
+     +/
+    borderBottomOnly,
+
+    /++
+        Quick scan that will only process the left border
+
+        Example:
+            [5x4]
+            (0/0), (0/1), (0/2), (0/3)
+     +/
+    borderLeftOnly,
+
+    /++
+        Quick scan that will only process the right border
+
+        Example:
+            [5x4]
+            (4/0), (4/1), (4/2), (4/3)
+     +/
+    borderRightOnly,
+
+    /++
+        Quick scan that will only process the top border
+
+        Example:
+            [5x4]
+            (0/0), (1/0), (2/0), (3/0), (4/0)
+     +/
+    borderTopOnly,
 }
 
 /++
-    Calculates if a collision occured for the passed block
+    Determines whether a collision occures for the passed block
  +/
 bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D, Block)(
         MatrixCollider mxcr, Matrix2D matrix, Block block) if (isBlockType!Block)
@@ -266,11 +302,25 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D, Blo
 bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(MatrixCollider mxcr, Matrix2D matrix,
         size_t blockPositionX, size_t blockPositionY, size_t blockWidth, size_t blockHeight)
 {
-    immutable size_t aX = blockPositionX / mxcr.tileSize;
-    immutable size_t aY = blockPositionY / mxcr.tileSize;
+    static if (scanProcedure != ScanProcedure.borderRightOnly)
+    {
+        immutable size_t aX = blockPositionX / mxcr.tileSize;
+    }
 
-    immutable size_t bX = (blockPositionX + blockWidth - 1) / mxcr.tileSize;
-    immutable size_t bY = (blockPositionY + blockHeight - 1) / mxcr.tileSize;
+    static if (scanProcedure != ScanProcedure.borderBottomOnly)
+    {
+        immutable size_t aY = blockPositionY / mxcr.tileSize;
+    }
+
+    static if (scanProcedure != ScanProcedure.borderLeftOnly)
+    {
+        immutable size_t bX = (blockPositionX + blockWidth) / mxcr.tileSize - 1;
+    }
+
+    static if (scanProcedure != ScanProcedure.borderTopOnly)
+    {
+        immutable size_t bY = (blockPositionY + blockHeight) / mxcr.tileSize - 1;
+    }
 
     static if (scanProcedure == ScanProcedure.rowByRow)
     {
@@ -367,10 +417,51 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
             }
         }
     }
+    else static if (scanProcedure == ScanProcedure.borderBottomOnly)
+    {
+        for (size_t x = aX; x <= bX; ++x)
+        {
+            if (matrix[bY][x])
+            {
+                return true;
+            }
+        }
+    }
+    else static if (scanProcedure == ScanProcedure.borderLeftOnly)
+    {
+        for (size_t y = aY; y <= bY; ++y)
+        {
+            if (matrix[y][aX])
+            {
+                return true;
+            }
+        }
+    }
+    else static if (scanProcedure == ScanProcedure.borderRightOnly)
+    {
+        for (size_t y = aY; y <= bY; ++y)
+        {
+            if (matrix[y][bX])
+            {
+                return true;
+            }
+        }
+    }
+    else static if (scanProcedure == ScanProcedure.borderTopOnly)
+    {
+        for (size_t x = aX; x <= bX; ++x)
+        {
+            if (matrix[aY][x])
+            {
+                return true;
+            }
+        }
+    }
     else
     {
         static assert("No implementation for scan procedure: " ~ scanProcedure);
     }
+
     return false;
 }
 
