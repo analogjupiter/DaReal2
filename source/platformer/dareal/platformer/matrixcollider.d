@@ -330,6 +330,42 @@ enum ScanProcedure
             (4/4)
      +/
     cornerBottomRightOnly,
+
+    /++
+        Dual column scan that will only process the top pair of corners
+
+        Example:
+            [5x5]
+            (0/0), (4/0)
+     +/
+    cornersTopOnly,
+
+    /++
+        Dual column scan that will only process the bottom pair of corners
+
+        Example:
+            [5x5]
+            (0/4), (4/4)
+     +/
+    cornersBottomOnly,
+
+    /++
+        Dual column scan that will only process the left pair of corners
+
+        Example:
+            [5x5]
+            (0/0), (0/4)
+     +/
+    cornersLeftOnly,
+
+    /++
+        Dual column scan that will only process the right pair of corners
+
+        Example:
+            [5x5]
+            (4/0), (4/4)
+     +/
+    cornersRightOnly,
 }
 
 /++
@@ -347,33 +383,39 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D, Blo
 bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(MatrixCollider mxcr, Matrix2D matrix,
         size_t blockPositionX, size_t blockPositionY, size_t blockWidth, size_t blockHeight)
 {
+    // dfmt off
     static if (scanProcedure != ScanProcedure.borderRightOnly
             && scanProcedure != ScanProcedure.cornerBottomRightOnly
-            && scanProcedure != ScanProcedure.cornerTopRightOnly)
+            && scanProcedure != ScanProcedure.cornerTopRightOnly
+            && scanProcedure != ScanProcedure.cornersRightOnly)
     {
         immutable size_t aX = blockPositionX / mxcr.tileSize;
     }
 
     static if (scanProcedure != ScanProcedure.borderBottomOnly
             && scanProcedure != ScanProcedure.cornerBottomLeftOnly
-            && scanProcedure != ScanProcedure.cornerBottomRightOnly)
+            && scanProcedure != ScanProcedure.cornerBottomRightOnly
+            && scanProcedure != ScanProcedure.cornersBottomOnly)
     {
         immutable size_t aY = blockPositionY / mxcr.tileSize;
     }
 
     static if (scanProcedure != ScanProcedure.borderLeftOnly
             && scanProcedure != ScanProcedure.cornerBottomLeftOnly
-            && scanProcedure != ScanProcedure.cornerTopLeftOnly)
+            && scanProcedure != ScanProcedure.cornerTopLeftOnly
+            && scanProcedure != ScanProcedure.cornersLeftOnly)
     {
         immutable size_t bX = (blockPositionX + blockWidth) / mxcr.tileSize - 1;
     }
 
     static if (scanProcedure != ScanProcedure.borderTopOnly
             && scanProcedure != ScanProcedure.cornerTopLeftOnly
-            && scanProcedure != ScanProcedure.cornerTopRightOnly)
+            && scanProcedure != ScanProcedure.cornerTopRightOnly
+            && scanProcedure != ScanProcedure.cornersTopOnly)
     {
         immutable size_t bY = (blockPositionY + blockHeight) / mxcr.tileSize - 1;
     }
+    // dfmt on
 
     static if (scanProcedure == ScanProcedure.rowByRow)
     {
@@ -548,6 +590,26 @@ bool collide(ScanProcedure scanProcedure = ScanProcedure.rowByRow, Matrix2D)(Mat
     {
         pragma(inline, true);
         return (matrix[bY][bX]);
+    }
+    else static if (scanProcedure == ScanProcedure.cornersTopOnly)
+    {
+        pragma(inline, true);
+        return (matrix[aY][aX] || matrix[aY][bX]);
+    }
+    else static if (scanProcedure == ScanProcedure.cornersBottomOnly)
+    {
+        pragma(inline, true);
+        return (matrix[bY][aX] || matrix[bY][bX]);
+    }
+    else static if (scanProcedure == ScanProcedure.cornersLeftOnly)
+    {
+        pragma(inline, true);
+        return (matrix[aY][aX] || matrix[bY][aX]);
+    }
+    else static if (scanProcedure == ScanProcedure.cornersRightOnly)
+    {
+        pragma(inline, true);
+        return (matrix[aY][bX] || matrix[bY][bX]);
     }
     else
     {
