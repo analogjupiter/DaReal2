@@ -64,7 +64,7 @@ final class Camera
 
 private final class CameraLockHelper
 {
-    private static
+    private __gshared
     {
         CameraLockHelper _instance;
     }
