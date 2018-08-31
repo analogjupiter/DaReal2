@@ -22,15 +22,29 @@ alias collideJumpUp(MatrixWalls) = collide!(ScanProcedure.borderTopOnly, MatrixW
 
 /++
     Pass all matrices containing blocks the character could land on to this function.
-    If there're obstacles the player could hit pass their matrix, too.
+    If there're obstacles the character could hit pass their matrix, too.
  +/
 alias collideJumpFalling(MatrixWallsAndJumpThroughBlocks) = collide!(
         ScanProcedure.borderBottomOnly, MatrixWallsAndJumpThroughBlocks);
 
+/++
+    Determines whether a character collids with any obstacle when walking to the specified position to their left.
+
+    Pass all matrices containing walls, jumpthrough blocks or any other obstacles to this function.
+ +/
 alias collideWalkLeft(MatrixWallsAndJumpThroughBlocks) = collide!(ScanProcedure.borderLeftOnly);
+
+/++
+    Determines whether a character collids with any obstacle when walking to the specified position to their right.
+
+    Pass all matrices containing walls, jumpthrough blocks or any other obstacles to this function.
+ +/
 alias collideWalkRight(MatrixWallsAndJumpThroughBlocks) = collide!(
         ScanProcedure.borderRightOnly, MatrixWallsAndJumpThroughBlocks);
 
+/++
+    Determines whether a character stands on a fallthrough block.
+ +/
 alias canFallThrough(MatrixFallThroughBlocks) = collide!(
         ScanProcedure.borderBottomOnly, MatrixFallThroughBlocks);
 
