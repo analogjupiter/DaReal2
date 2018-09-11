@@ -14,4 +14,5 @@ module dareal.platformer;
 
 public:
 import dareal.platformer.matrixcollider;
+import dareal.platformer.movement;
 import dareal.platformer.world;
