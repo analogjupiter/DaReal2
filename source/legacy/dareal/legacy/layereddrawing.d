@@ -62,36 +62,17 @@ final class Camera
     }
 }
 
-private final class CameraLockHelper
+private __gshared
 {
-    private __gshared
-    {
-        CameraLockHelper _instance;
-    }
-
-    private this()
-    {
-    }
-
-    public static @property CameraLockHelper instance()
-    {
-        if (this._instance is null)
-        {
-            this._instance = new CameraLockHelper();
-        }
-
-        return this._instance;
-    }
-
-    public void lockX(Camera c, Point old)
+    auto lockX = delegate(Camera c, Point old)
     {
         c._position.x = old.x;
-    }
+    };
 
-    public void lockY(Camera c, Point old)
+    auto lockY = delegate(Camera c, Point old)
     {
         c._position.y = old.y;
-    }
+    };
 }
 
 /++
@@ -100,12 +81,12 @@ private final class CameraLockHelper
 void lockCameraY(Camera c)
 in
 {
-    assert(!c.cameraOffsetChanged.canFind(&CameraLockHelper.instance.lockY),
+    assert(!c.cameraOffsetChanged.canFind(lockY),
             "camera is already height-locked");
 }
 do
 {
-    c._cameraOffsetChanged = &CameraLockHelper.instance.lockY ~ c._cameraOffsetChanged;
+    c._cameraOffsetChanged = lockY ~ c._cameraOffsetChanged;
 }
 
 /++
@@ -114,7 +95,7 @@ do
 void relockCameraY(Camera c, int newY)
 in
 {
-    assert(c.cameraOffsetChanged.canFind(&CameraLockHelper.instance.lockY));
+    assert(c.cameraOffsetChanged.canFind(lockY));
 }
 do
 {
@@ -127,11 +108,11 @@ do
 void unlockCameraY(Camera c)
 in
 {
-    assert(c.cameraOffsetChanged.canFind(&CameraLockHelper.instance.lockY));
+    assert(c.cameraOffsetChanged.canFind(lockY));
 }
 do
 {
-    c._cameraOffsetChanged.remove!(q => (q == &CameraLockHelper.instance.lockY));
+    c._cameraOffsetChanged.remove!(q => (q == lockY));
 }
 
 /++
@@ -140,12 +121,12 @@ do
 void lockCameraX(Camera c)
 in
 {
-    assert(!c.cameraOffsetChanged.canFind(&CameraLockHelper.instance.lockX),
+    assert(!c.cameraOffsetChanged.canFind(lockX),
             "camera is already height-locked");
 }
 do
 {
-    c._cameraOffsetChanged = &CameraLockHelper.instance.lockX ~ c._cameraOffsetChanged;
+    c._cameraOffsetChanged = lockX ~ c._cameraOffsetChanged;
 }
 
 /++
@@ -154,7 +135,7 @@ do
 void relockCameraX(Camera c, int newX)
 in
 {
-    assert(c.cameraOffsetChanged.canFind(&CameraLockHelper.instance.lockX));
+    assert(c.cameraOffsetChanged.canFind(lockX));
 }
 do
 {
@@ -167,11 +148,11 @@ do
 void unlockCameraX(Camera c)
 in
 {
-    assert(c.cameraOffsetChanged.canFind(&CameraLockHelper.instance.lockY));
+    assert(c.cameraOffsetChanged.canFind(lockY));
 }
 do
 {
-    c._cameraOffsetChanged.remove!(q => (q == &CameraLockHelper.instance.lockX));
+    c._cameraOffsetChanged.remove!(q => (q == lockX));
 }
 
 /++
