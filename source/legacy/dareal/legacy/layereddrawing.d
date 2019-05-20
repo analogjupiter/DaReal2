@@ -167,7 +167,19 @@ final class Layer : IDrawable
         IDrawable[] _drawings;
     }
 
-    public alias _drawings this;
+    public
+    {
+        @property
+        {
+            /++
+                Drawings the layer consists of
+             +/
+            ref IDrawable[] drawings()
+            {
+                return this._drawings;
+            }
+        }
+    }
 
     public
     {
@@ -181,6 +193,32 @@ final class Layer : IDrawable
             {
                 d.draw();
             }
+        }
+
+        /++
+            Appends a new Drawing to the layer
+         +/
+        void opOpAssign(string op : "~")(IDrawable d)
+        {
+            this._drawings ~= d;
+        }
+
+        /++
+            Applies all drawings to the passed delegate.
+            Usually used with `foreach`.
+         +/
+        int opApply(scope int delegate(ref IDrawable) dg)
+        {
+            int result = 0;
+            for (size_t i = 0; i < this._drawings.length; i++)
+            {
+                result = dg(this._drawings[i]);
+                if (result)
+                {
+                    break;
+                }
+            }
+            return result;
         }
     }
 }
