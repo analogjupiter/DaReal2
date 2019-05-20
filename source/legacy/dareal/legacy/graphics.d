@@ -1101,3 +1101,74 @@ public
      +/
     alias TextBlock = Text!true;
 }
+
+/++
+    Simple rectangle shape
+ +/
+final class Rectangle : PositionedDrawing
+{
+    private
+    {
+        Color _color;
+        Size _size;
+    }
+
+    public
+    {
+        @property
+        {
+            /++
+                Background color
+             +/
+            Color color()
+            {
+                return this._color;
+            }
+
+            /++ ditto +/
+            void color(Color value)
+            {
+                this._color = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Size of the rectangle
+             +/
+            Size size()
+            {
+                return this._size;
+            }
+
+            /++ ditto +/
+            void size(Size value)
+            {
+                this._size = value;
+            }
+        }
+    }
+
+    /++
+        ctor
+     +/
+    public this(Color color, Point position, Size size)
+    {
+        this._color = color;
+        this._size = size;
+        this._position = position;
+    }
+
+    public override
+    {
+        void draw()
+        {
+            darealNVGContext.beginPath();
+            darealNVGContext.rect(this.position.x, this.position.y,
+                    this.size.width, this.size.height);
+            darealNVGContext.fillColor = this._color;
+            darealNVGContext.fill();
+        }
+    }
+}
