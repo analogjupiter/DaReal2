@@ -1172,3 +1172,111 @@ final class Rectangle : PositionedDrawing
         }
     }
 }
+
+/++
+    Simple line
+ +/
+final class Line : PositionedDrawing
+{
+    private
+    {
+        Color _color;
+        Point _end;
+        float _width;
+    }
+
+    public
+    {
+        @property
+        {
+            /++
+                Background color
+             +/
+            Color color()
+            {
+                return this._color;
+            }
+
+            /++ ditto +/
+            void color(Color value)
+            {
+                this._color = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Starting pointing of the line
+             +/
+            Point start()
+            {
+                return this.position;
+            }
+
+            /++ ditto +/
+            void start(Point value)
+            {
+                this.position = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Endpoint of the line
+             +/
+            Point end()
+            {
+                return this._end;
+            }
+
+            /++ ditto +/
+            void end(Point value)
+            {
+                this._end = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Width of the line in pixels
+             +/
+            float width()
+            {
+                return this._width;
+            }
+
+            /++ ditto +/
+            void width(float value)
+            {
+                this._width = value;
+            }
+        }
+    }
+
+    /++
+        ctor
+     +/
+    public this(Color color, Point start, Point end, float width)
+    {
+        this._color = color;
+        this._position = start;
+        this._end = end;
+        this._width = width;
+    }
+
+    public override
+    {
+        void draw()
+        {
+            darealNVGContext.beginPath();
+            darealNVGContext.moveTo(this.start.x, this.start.y);
+            darealNVGContext.lineTo(this.end.x, this.end.y);
+            darealNVGContext.strokeColor = this._color;
+            darealNVGContext.strokeWidth = this._width;
+            darealNVGContext.stroke();
+        }
+    }
+}
