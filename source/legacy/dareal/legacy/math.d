@@ -264,3 +264,23 @@ struct Size
         this._height *= b;
     }
 }
+
+/++
+    Returns: Top left corner of the specified shape
+ +/
+Point centerToTopLeft(Point center, Size size)
+{
+    immutable x = (center.x - (size.width / 2));
+    immutable y = (center.y - (size.height / 2));
+    return Point(x, y);
+}
+
+/++
+    Returns: Center point of the specified shape
+ +/
+Point topLeftToCenter(Point topLeft, Size size)
+{
+    immutable x = (topLeft.x + (size.width / 2));
+    immutable y = (topLeft.y + (size.height / 2));
+    return Point(x, y);
+}

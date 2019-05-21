@@ -196,7 +196,7 @@ final class Layer : IDrawable
         }
 
         /++
-            Appends a new Drawing to the layer
+            Appends a drawing to the layer
          +/
         void opOpAssign(string op : "~")(IDrawable d)
         {
