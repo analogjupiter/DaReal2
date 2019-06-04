@@ -931,6 +931,12 @@ final class FontFace
     {
         this.id = fontFaceID;
     }
+
+    void apply(float fontSize)
+    {
+        darealNVGContext.fontFaceId = this.id;
+        darealNVGContext.fontSize = fontSize;
+    }
 }
 
 /++
