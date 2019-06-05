@@ -229,7 +229,7 @@ final class TaskQueueBase(TaskType)
                         return;
                     }
 
-                    t = this._tasks.removeAny();
+                    t = this._tasks.stableRemoveAny();
                 }
                 t.execute();
             }
@@ -339,8 +339,6 @@ struct Task(bool useDelegate = true)
      +/
     void execute()
     {
-        import core.atomic : atomicStore;
-
         this.callback();
         this._semaphore.notifyAll(true);
     }
@@ -361,8 +359,6 @@ struct Task(bool useDelegate = true)
      +/
     void await()
     {
-        import core.atomic : atomicLoad;
-
         this._semaphore.wait();
     }
 }
