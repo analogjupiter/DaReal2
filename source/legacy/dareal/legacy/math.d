@@ -284,3 +284,18 @@ Point topLeftToCenter(Point topLeft, Size size)
     immutable y = (topLeft.y + (size.height / 2));
     return Point(x, y);
 }
+
+/++
+    Simple collision detection
+
+    Returns:
+        true if p is inside the rectangle
+ +/
+bool collide(Size rectangle, Point rectanglePositionTopLeft, Point p)
+{
+    alias rs = rectangle;
+    alias rp1 = rectanglePositionTopLeft;
+    auto rp2 = Point((rp1.x + rs.width), (rp1.y + rs.height));
+
+    return ((p.x >= rp1.x) && (p.x <= rp2.x) && (p.y >= rp1.y) && (p.y <= rp2.y));
+}
