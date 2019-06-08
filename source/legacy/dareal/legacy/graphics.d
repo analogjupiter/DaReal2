@@ -1286,3 +1286,124 @@ final class Line : PositionedDrawing
         }
     }
 }
+
+/++
+    Simple circle shape
+ +/
+final class Circle : PositionedDrawing
+{
+    private
+    {
+        Color _color;
+        float _radius;
+    }
+
+    public
+    {
+        @property
+        {
+            /++
+                Background color
+             +/
+            Color color()
+            {
+                return this._color;
+            }
+
+            /++ ditto +/
+            void color(Color value)
+            {
+                this._color = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Diameter of the circle
+             +/
+            float diameter()
+            {
+                return (this.radius * 2);
+            }
+
+            /++ ditto +/
+            void diameter(float value)
+            {
+                this._radius = (value / 2);
+            }
+        }
+
+        @property
+        {
+            /++
+                Radius of the circle
+             +/
+            float radius()
+            {
+                return this._radius;
+            }
+
+            /++ ditto +/
+            void radius(float value)
+            {
+                this._radius = value;
+            }
+        }
+
+        @property
+        {
+            /++
+                Top left corner of the circle's virtual surrounding square
+             +/
+            Point topLeft()
+            {
+                return this.centerToTopLeft(this.position);
+            }
+
+            /++ ditto +/
+            void topLeft(Point value)
+            {
+                this.position = this.topLeftToCenter(value);
+            }
+        }
+    }
+
+    /++
+        ctor
+     +/
+    public this(Color color, Point center, float radius)
+    {
+        this._color = color;
+        this._radius = radius;
+        this._position = center;
+    }
+
+    public override
+    {
+        void draw()
+        {
+            darealNVGContext.beginPath();
+            darealNVGContext.circle(this.position.x, this.position.y, this._radius);
+            darealNVGContext.fillColor = this._color;
+            darealNVGContext.fill();
+        }
+    }
+
+    private
+    {
+        Point centerToTopLeft(Point center)
+        {
+            immutable x = (center.x - this._radius.to!int);
+            immutable y = (center.y - this._radius.to!int);
+            return Point(x, y);
+        }
+
+        Point topLeftToCenter(Point topLeft)
+        {
+            immutable x = (topLeft.x + this._radius.to!int);
+            immutable y = (topLeft.y + this._radius.to!int);
+            return Point(x, y);
+        }
+    }
+}
