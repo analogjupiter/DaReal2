@@ -268,7 +268,7 @@ struct Size
 /++
     Returns: Top left corner of the specified shape
  +/
-Point centerToTopLeft(Point center, Size size)
+Point centerToTopLeft(Point center, Size size) @safe pure nothrow @nogc
 {
     immutable x = (center.x - (size.width / 2));
     immutable y = (center.y - (size.height / 2));
@@ -278,7 +278,7 @@ Point centerToTopLeft(Point center, Size size)
 /++
     Returns: Center point of the specified shape
  +/
-Point topLeftToCenter(Point topLeft, Size size)
+Point topLeftToCenter(Point topLeft, Size size) @safe pure nothrow @nogc
 {
     immutable x = (topLeft.x + (size.width / 2));
     immutable y = (topLeft.y + (size.height / 2));
@@ -291,7 +291,7 @@ Point topLeftToCenter(Point topLeft, Size size)
     Returns:
         true if p is inside the rectangle
  +/
-bool collide(Size rectangle, Point rectanglePositionTopLeft, Point p)
+bool collide(Size rectangle, Point rectanglePositionTopLeft, Point p) @safe pure nothrow @nogc
 {
     alias rs = rectangle;
     alias rp1 = rectanglePositionTopLeft;
