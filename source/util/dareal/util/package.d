@@ -12,5 +12,6 @@
 module dareal.util;
 
 public:
+import dareal.util.format;
 import dareal.util.path;
 import dareal.util.sync;
