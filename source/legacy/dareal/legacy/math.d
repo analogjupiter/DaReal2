@@ -38,6 +38,12 @@ struct Point
             }
 
             /++ ditto +/
+            int x() immutable
+            {
+                return this._x;
+            }
+
+            /++ ditto +/
             void x(int value)
             {
                 this._x = value;
@@ -52,6 +58,12 @@ struct Point
                 "ordinate"
              +/
             ref int y()
+            {
+                return this._y;
+            }
+
+            /++ ditto +/
+            int y() immutable
             {
                 return this._y;
             }
@@ -171,6 +183,12 @@ struct Size
             }
 
             /++ ditto +/
+            int width() immutable
+            {
+                return this._width;
+            }
+
+            /++ ditto +/
             void width(int value)
             {
                 this._width = value;
@@ -183,6 +201,12 @@ struct Size
                 Height
              +/
             ref int height()
+            {
+                return this._height;
+            }
+
+            /++ ditto +/
+            int height() immutable
             {
                 return this._height;
             }
